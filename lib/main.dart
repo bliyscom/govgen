@@ -68,6 +68,7 @@ class OllamaChatApp extends StatelessWidget {
       ],
       supportedLocales: const [
         Locale('en', ''),
+        Locale('fr', ''),
         Locale('th', ''),
         Locale('ru', ''),
         Locale('zh', ''),
@@ -82,6 +83,8 @@ class MainLayout extends StatelessWidget {
 
   String _getFlagEmoji(String langCode) {
     switch (langCode) {
+      case 'fr':
+        return '🇫🇷';
       case 'th':
         return '🇹🇭';
       case 'ru':
@@ -179,6 +182,7 @@ class MainLayout extends StatelessWidget {
                     ),
                     itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                       _buildLanguageItem('en', '🇺🇸 English', state.locale.languageCode),
+                      _buildLanguageItem('fr', '🇫🇷 Français', state.locale.languageCode),
                       _buildLanguageItem('th', '🇹🇭 ภาษาไทย', state.locale.languageCode),
                       _buildLanguageItem('ru', '🇷🇺 Русский', state.locale.languageCode),
                       _buildLanguageItem('zh', '🇨🇳 中文', state.locale.languageCode),
