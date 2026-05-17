@@ -104,7 +104,18 @@ ollama pull gemma4
 ```
 *(This downloads the default `gemma4` variant, which aliases to `gemma4:e4b`)*
 
-### 4. Build and Run GovGen
+### 4. Setup and Launch the Python Backend
+GovGen's autonomous python execution laboratory, unified OpenAlex/ArXiv academic searches, and PDF extraction proxy require the FastAPI Python server to be running in the background.
+
+```bash
+# Install backend requirements
+pip install -r backend/requirements.txt
+
+# Run the FastAPI server locally on http://127.0.0.1:8000
+python backend/main.py
+```
+
+### 5. Build and Run GovGen Frontend
 
 ```bash
 # Get Flutter dependencies
