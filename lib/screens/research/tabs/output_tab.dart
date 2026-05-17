@@ -520,13 +520,13 @@ class _OutputTabState extends State<OutputTab> with AutomaticKeepAliveClientMixi
                 const Icon(Icons.auto_awesome, size: 14, color: OhadaTheme.accent),
                 const SizedBox(width: 6),
                 Expanded(child: Text("Edit: ${section.title}", style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
-                // Paraphrase settings
+                // Section Prompt settings
                 IconButton(
-                  icon: const Icon(Icons.settings, size: 14, color: Colors.grey),
-                  onPressed: () => _showParaphraseSettings(context, state),
+                  icon: const Icon(Icons.settings, size: 14, color: Colors.blueAccent),
+                  onPressed: () => _showSectionPromptSettings(context, state, section),
                   constraints: const BoxConstraints(),
                   padding: EdgeInsets.zero,
-                  tooltip: 'Paraphrase Settings',
+                  tooltip: 'Section Prompt Settings',
                 ),
               ],
             ),
@@ -610,38 +610,6 @@ class _OutputTabState extends State<OutputTab> with AutomaticKeepAliveClientMixi
     );
   }
 
-  void _showParaphraseSettings(BuildContext context, ChatState state) {
-    final ctrl = TextEditingController(text: state.paraphraseInstructions);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: OhadaTheme.surface,
-        title: const Text("Paraphrase Instructions", style: TextStyle(fontSize: 14, color: OhadaTheme.accent)),
-        content: SizedBox(
-          width: 400,
-          child: TextField(
-            controller: ctrl,
-            maxLines: 6,
-            style: const TextStyle(fontSize: 12),
-            decoration: const InputDecoration(
-              hintText: "Enter custom paraphrase instructions...",
-              border: OutlineInputBorder(),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
-          ElevatedButton(
-            onPressed: () {
-              state.setParaphraseInstructions(ctrl.text);
-              Navigator.pop(ctx);
-            },
-            child: const Text("Save"),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 /// Rich content renderer that handles Markdown, math formulas, and citation highlighting
