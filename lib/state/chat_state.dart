@@ -102,6 +102,9 @@ class ChatState extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.dark;
   ThemeMode get themeMode => _themeMode;
 
+  Locale _locale = const Locale('en', '');
+  Locale get locale => _locale;
+
 
   String _paraphraseInstructions = "Paraphrase the following academic text to be more original while preserving the meaning, technical accuracy, and citation references. Use varied sentence structures, different vocabulary, and rephrase without losing scholarly tone. Do NOT remove or alter any citations.";
   String get paraphraseInstructions => _paraphraseInstructions;
@@ -228,6 +231,11 @@ class ChatState extends ChangeNotifier {
       if (savedTheme != null) {
         _themeMode = savedTheme == 'light' ? ThemeMode.light : ThemeMode.dark;
       }
+      
+      final savedLocale = _settingsBox.get('language_code');
+      if (savedLocale != null) {
+        _locale = Locale(savedLocale, '');
+      }
 
       await fetchModels();
     } catch (e) {
@@ -301,6 +309,12 @@ class ChatState extends ChangeNotifier {
   void toggleTheme() {
     _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
     _settingsBox.put('theme_mode', _themeMode == ThemeMode.light ? 'light' : 'dark');
+    notifyListeners();
+  }
+
+  void setLocale(String langCode) {
+    _locale = Locale(langCode, '');
+    _settingsBox.put('language_code', langCode);
     notifyListeners();
   }
 

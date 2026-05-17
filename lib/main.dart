@@ -59,6 +59,7 @@ class OllamaChatApp extends StatelessWidget {
         useMaterial3: true,
       ),
       themeMode: state.themeMode,
+      locale: state.locale,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -79,6 +80,45 @@ class OllamaChatApp extends StatelessWidget {
 class MainLayout extends StatelessWidget {
   const MainLayout({super.key});
 
+  String _getFlagEmoji(String langCode) {
+    switch (langCode) {
+      case 'th':
+        return '🇹🇭';
+      case 'ru':
+        return '🇷🇺';
+      case 'zh':
+        return '🇨🇳';
+      case 'en':
+      default:
+        return '🇺🇸';
+    }
+  }
+
+  PopupMenuItem<String> _buildLanguageItem(String code, String name, String currentCode) {
+    final bool isActive = code == currentCode;
+    return PopupMenuItem<String>(
+      value: code,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            name,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          if (isActive)
+            const Icon(
+              Icons.check_circle,
+              color: OhadaTheme.accent,
+              size: 16,
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<ChatState>();
@@ -95,15 +135,69 @@ class MainLayout extends StatelessWidget {
           Positioned(
             top: 20,
             right: 20,
-            child: FloatingActionButton.small(
-              heroTag: 'theme_switcher',
-              onPressed: () => state.toggleTheme(),
-              backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
-              child: Icon(
-                state.themeMode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
-                color: OhadaTheme.accent,
-                size: 20,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Language Selector
+                Theme(
+                  data: Theme.of(context).copyWith(
+                    cardColor: Theme.of(context).colorScheme.surface,
+                  ),
+                  child: PopupMenuButton<String>(
+                    tooltip: 'Change Language',
+                    onSelected: (String langCode) {
+                      state.setLocale(langCode);
+                    },
+                    offset: const Offset(0, 45),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: OhadaTheme.accent.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          _getFlagEmoji(state.locale.languageCode),
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                      ),
+                    ),
+                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                      _buildLanguageItem('en', '🇺🇸 English', state.locale.languageCode),
+                      _buildLanguageItem('th', '🇹🇭 ภาษาไทย', state.locale.languageCode),
+                      _buildLanguageItem('ru', '🇷🇺 Русский', state.locale.languageCode),
+                      _buildLanguageItem('zh', '🇨🇳 中文', state.locale.languageCode),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Theme Switcher Button
+                FloatingActionButton.small(
+                  heroTag: 'theme_switcher',
+                  onPressed: () => state.toggleTheme(),
+                  backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                  child: Icon(
+                    state.themeMode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+                    color: OhadaTheme.accent,
+                    size: 20,
+                  ),
+                ),
+              ],
             ),
           ),
           if (state.isResearchHubOpen)
