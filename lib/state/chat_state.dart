@@ -1027,7 +1027,15 @@ $fbCtx
 $prevCtx
 """;
 
-      final sectionSystem = agentInstructions[4]!.replaceAll('{{CITATION_STYLE}}', citationStyle) + "\n" + ctx;
+      final selfRegulatoryStr = """
+
+### SELF-REGULATION & CONTEXT-CHAINING DIRECTIVES:
+1. Examine the 'PREVIOUSLY WRITTEN CONTENT (Context)' provided in the prompt.
+2. Verify if the previous sections have content and judge if that content makes logical sense within the project scope.
+3. If it makes logical sense, build your reasoning directly upon its findings, terminology, and flow to ensure a seamless, context-chained transition.
+4. CRITICAL: ABSOLUTELY DO NOT reproduce, summarize, or repeat the content of the previous sections. Focus strictly on drafting the unique, complementary content for the current section: '$sectionName'.
+""";
+      final sectionSystem = agentInstructions[4]!.replaceAll('{{CITATION_STYLE}}', citationStyle) + "\n" + ctx + selfRegulatoryStr;
       
       final pass1Messages = [
         ChatMessage(role: 'system', content: sectionSystem),
@@ -1802,6 +1810,30 @@ $paragraph""";
       final knowledgeBase = buildLiteratureKnowledgeBase();
       final customPromptStr = section.customPrompt.isNotEmpty ? "\n\nSECTION-SPECIFIC RULES YOU MUST FOLLOW:\n${section.customPrompt}" : "";
 
+      // Construct previous sections' content as context
+      final StringBuffer previousSectionsBuffer = StringBuffer();
+      for (int j = 0; j < sectionIdx; j++) {
+        final prevSec = _currentProject!.sections[j];
+        if (prevSec.content.trim().isNotEmpty) {
+          previousSectionsBuffer.writeln("### ${prevSec.title}");
+          previousSectionsBuffer.writeln(prevSec.content.trim());
+          previousSectionsBuffer.writeln();
+        }
+      }
+      final previousContentStr = previousSectionsBuffer.toString();
+      final prevCtx = previousContentStr.isNotEmpty 
+          ? "\n\nPREVIOUSLY WRITTEN CONTENT (Context):\n$previousContentStr" 
+          : "";
+
+      final selfRegulationPrompt = """
+
+### SELF-REGULATION & CONTEXT-CHAINING DIRECTIVES:
+1. Examine the 'PREVIOUSLY WRITTEN CONTENT (Context)' provided in the user prompt.
+2. Verify if the previous sections have content and judge if that content makes logical sense within the project scope.
+3. If it makes logical sense, build your reasoning directly upon its findings, terminology, and flow to ensure a seamless, context-chained transition.
+4. CRITICAL: ABSOLUTELY DO NOT duplicate, replicate, repeat, or summarize any content from the previous sections. Focus strictly on modifying or generating content for the current section '${section.title}'.
+""";
+
       final systemPrompt = """You are an Elite Academic Editor. 
 Your task is to apply a specific EDIT INSTRUCTION to the 'CURRENT CONTENT' of the '${section.title}' section.
 
@@ -1812,13 +1844,14 @@ CRITICAL RULES:
 4. ABSOLUTELY NO CONVERSATIONAL OUTPUT, EXPLANATIONS, OR PREAMBLES. 
 5. Output ONLY the raw updated text.
 6. ${isMetaSection ? 'This is a metadata section. DO NOT add citations.' : 'Maintain existing citations style.'}
-$customPromptStr""";
+$customPromptStr$selfRegulationPrompt""";
       
       final userMessage = """EDIT INSTRUCTION:
 $prompt
 
 CURRENT CONTENT:
 $originalContent
+$prevCtx
 
 ${isMetaSection ? '' : 'SUPPORTING CONTEXT:\n' + knowledgeBase}""";
       
