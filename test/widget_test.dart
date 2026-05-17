@@ -5,23 +5,23 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 import 'package:govgen/main.dart';
+import 'package:govgen/state/chat_state.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('GovGen app smoke test', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
-    final prefs = await SharedPreferences.getInstance();
+    await SharedPreferences.getInstance();
     
     // Build our app and trigger a frame.
     await tester.pumpWidget(
       ChangeNotifierProvider(
-        create: (context) => ChatState(prefs),
+        create: (context) => ChatState(),
         child: const OllamaChatApp(),
       ),
     );

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GovGen Document Editor</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+  <div class="main-content">
+    <!-- Toolbar -->
+    <div class="toolbar-wrapper">
+      <div class="toolbar">
+        <!-- History -->
+        <div class="group">
+          <button onclick="document.execCommand('undo')" title="Undo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 7v6h6"></path>
+              <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path>
+            </svg>
+          </button>
+          <button onclick="document.execCommand('redo')" title="Redo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 7v6h-6"></path>
+              <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Text Style -->
+        <div class="group">
+          <div class="dropdown">
+            <button class="dropdown-trigger" onclick="toggleDropdown('style-menu')">
+              <span id="style-label">Normal</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="dropdown-menu" id="style-menu">
+              <button class="dropdown-item"
+                onclick="document.execCommand('formatBlock', false, 'h1'); updateStyleLabel('Heading 1')">Heading
+                1</button>
+              <button class="dropdown-item"
+                onclick="document.execCommand('formatBlock', false, 'h2'); updateStyleLabel('Heading 2')">Heading
+                2</button>
+              <button class="dropdown-item"
+                onclick="document.execCommand('formatBlock', false, 'h3'); updateStyleLabel('Heading 3')">Heading
+                3</button>
+              <button class="dropdown-item"
+                onclick="document.execCommand('formatBlock', false, 'p'); updateStyleLabel('Normal')">Normal
+                text</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Formatting -->
+        <div class="group">
+          <button onclick="document.execCommand('bold')" title="Bold (Ctrl+B)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+              <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
+            </svg>
+          </button>
+          <button onclick="document.execCommand('italic')" title="Italic (Ctrl+I)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="4" x2="10" y2="4"></line>
+              <line x1="14" y1="20" x2="5" y2="20"></line>
+              <line x1="15" y1="4" x2="9" y2="20"></line>
+            </svg>
+          </button>
+          <button onclick="document.execCommand('underline')" title="Underline (Ctrl+U)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path>
+              <line x1="4" y1="21" x2="20" y2="21"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Alignment -->
+        <div class="group">
+          <button onclick="document.execCommand('justifyLeft')" title="Align left">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="15" y2="12"></line>
+              <line x1="3" y1="18" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          <button onclick="document.execCommand('justifyCenter')" title="Align center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="6" y1="12" x2="18" y2="12"></line>
+              <line x1="4" y1="18" x2="20" y2="18"></line>
+            </svg>
+          </button>
+          <button onclick="document.execCommand('justifyRight')" title="Align right">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="9" y1="12" x2="21" y2="12"></line>
+              <line x1="6" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Lists -->
+        <div class="group">
+          <button onclick="document.execCommand('insertUnorderedList')" title="Bullet list">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <circle cx="4" cy="6" r="1" fill="currentColor"></circle>
+              <circle cx="4" cy="12" r="1" fill="currentColor"></circle>
+              <circle cx="4" cy="18" r="1" fill="currentColor"></circle>
+            </svg>
+          </button>
+          <button onclick="document.execCommand('insertOrderedList')" title="Numbered list">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="10" y1="6" x2="21" y2="6"></line>
+              <line x1="10" y1="12" x2="21" y2="12"></line>
+              <line x1="10" y1="18" x2="21" y2="18"></line>
+              <text x="3" y="8" font-size="8" fill="currentColor">1</text>
+              <text x="3" y="14" font-size="8" fill="currentColor">2</text>
+              <text x="3" y="20" font-size="8" fill="currentColor">3</text>
+            </svg>
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Insert -->
+        <div class="group">
+          <button onclick="document.execCommand('insertHorizontalRule')" title="Insert line">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editor -->
+    <div class="editor-wrapper">
+      <div class="doc-container" id="doc-container">
+        <!-- Pages will be auto-created here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Constants - US Letter size at 96 DPI
+    const PAGE_CONTENT_WIDTH = 672;  // 816 - 72*2 padding
+    const PAGE_CONTENT_HEIGHT = 912; // 1056 - 72*2 padding
+
+    let pageCount = 0;
+    let isUpdatingPages = false;
+    let overflowCheckTimer = null;
+
+    // Initialize
+    function init() {
+      createPage();
+      updatePageNumbers();
+      // Start periodic overflow check
+      startOverflowMonitoring();
+    }
+
+    // Start monitoring for overflow
+    function startOverflowMonitoring() {
+      setInterval(() => {
+        checkAllPagesOverflow();
+      }, 500);
+    }
+
+    // Check all pages for overflow
+    function checkAllPagesOverflow() {
+      const pages = document.querySelectorAll('.page');
+      pages.forEach(page => {
+        if (page.scrollHeight > page.clientHeight + 5) {
+          redistributeContent();
+        }
+      });
+    }
+
+    // Create a new page
+    function createPage(content = '') {
+      pageCount++;
+      const container = document.getElementById('doc-container');
+
+      const pageWrapper = document.createElement('div');
+      pageWrapper.className = 'page-wrapper';
+      pageWrapper.dataset.page = pageCount;
+
+      const page = document.createElement('div');
+      page.className = 'page';
+      page.contentEditable = 'true';
+      page.id = 'page-' + pageCount;
+
+      if (content) {
+        page.innerHTML = content;
+      } else if (pageCount === 1) {
+        page.innerHTML = '<h1>Untitled Document</h1><p>Start typing your document here...</p>';
+      }
+
+      // Listen for input to auto-paginate
+      page.addEventListener('input', handlePageInput);
+      page.addEventListener('paste', handlePaste);
+      page.addEventListener('keydown', handleKeyDown);
+
+      const pageNum = document.createElement('div');
+      pageNum.className = 'page-number';
+      pageNum.textContent = pageCount;
+
+      pageWrapper.appendChild(page);
+      pageWrapper.appendChild(pageNum);
+      container.appendChild(pageWrapper);
+
+      return page;
+    }
+
+    // Handle page input - check for overflow
+    function handlePageInput(e) {
+      if (isUpdatingPages) return;
+      checkPageOverflow(e.target);
+    }
+
+    // Handle keyboard events
+    function handleKeyDown(e) {
+      if (isUpdatingPages) return;
+
+      // Check for Enter key - trigger overflow check after newline
+      if (e.key === 'Enter') {
+        setTimeout(() => {
+          checkPageOverflow(e.target);
+        }, 50);
+      }
+    }
+
+    // Handle paste - redistribute content after paste
+    function handlePaste(e) {
+      setTimeout(() => {
+        redistributeContent();
+      }, 100);
+    }
+
+    // Check if page has overflow and redistribute
+    function checkPageOverflow(page) {
+      if (isUpdatingPages || !page) return;
+
+      // Check if content exceeds page height
+      if (page.scrollHeight > page.clientHeight) {
+        redistributeContent();
+      }
+    }
+
+    // Redistribute content across pages
+    function redistributeContent() {
+      if (isUpdatingPages) return;
+      isUpdatingPages = true;
+
+      const container = document.getElementById('doc-container');
+      const pages = Array.from(container.querySelectorAll('.page'));
+
+      if (pages.length === 0) {
+        isUpdatingPages = false;
+        return;
+      }
+
+      // Get all content from all pages
+      let allContent = [];
+
+      pages.forEach(page => {
+        const children = Array.from(page.children);
+        allContent.push(...children);
+      });
+
+      // Remove empty elements at start
+      while (allContent.length > 0 &&
+        ((allContent[0].tagName === 'P' && (allContent[0].innerHTML.trim() === '<br>' || allContent[0].innerHTML.trim() === '')) ||
+          (allContent[0].tagName === 'DIV' && allContent[0].innerHTML.trim() === ''))) {
+        allContent.shift();
+      }
+
+      // Clear all pages
+      pages.forEach(page => {
+        page.innerHTML = '<p><br></p>';
+      });
+
+      // Remove extra pages (keep first)
+      const wrappers = container.querySelectorAll('.page-wrapper');
+      for (let i = wrappers.length - 1; i > 0; i--) {
+        container.removeChild(wrappers[i]);
+      }
+
+      // Get first page or create new one
+      let currentPage = document.querySelector('.page');
+      if (!currentPage) {
+        currentPage = createPage();
+      } else {
+        currentPage.innerHTML = '';
+      }
+
+      // Distribute content across pages
+      let contentIndex = 0;
+
+      while (contentIndex < allContent.length) {
+        const element = allContent[contentIndex];
+        const clone = element.cloneNode(true);
+
+        currentPage.appendChild(clone);
+
+        // Check if we've exceeded page height
+        const currentHeight = currentPage.scrollHeight;
+
+        if (currentHeight > PAGE_CONTENT_HEIGHT && currentPage.children.length > 1) {
+          // Overflow - remove the element
+          currentPage.removeChild(clone);
+
+          // Create new page
+          currentPage = createPage();
+
+          // Add element to new page
+          currentPage.appendChild(clone);
+        }
+
+        contentIndex++;
+      }
+
+      // Clean up empty trailing pages
+      cleanupEmptyPages();
+
+      updatePageNumbers();
+      isUpdatingPages = false;
+    }
+
+    // Clean up empty pages (keep first page)
+    function cleanupEmptyPages() {
+      const container = document.getElementById('doc-container');
+      const wrappers = Array.from(container.querySelectorAll('.page-wrapper'));
+
+      // Start from last and remove empty pages (keeping first)
+      for (let i = wrappers.length - 1; i > 0; i--) {
+        const page = wrappers[i].querySelector('.page');
+        if (page) {
+          const text = page.innerText || page.textContent || '';
+          if (text.trim() === '' || page.children.length === 0) {
+            container.removeChild(wrappers[i]);
+          }
+        }
+      }
+    }
+
+    // Update page numbers
+    function updatePageNumbers() {
+      const pages = document.querySelectorAll('.page-number');
+      pages.forEach((num, index) => {
+        num.textContent = (index + 1).toString();
+      });
+    }
+
+    // Update style label
+    function updateStyleLabel(text) {
+      document.getElementById('style-label').textContent = text;
+      toggleDropdown('style-menu');
+    }
+
+    // Dropdown toggle
+    function toggleDropdown(id) {
+      const menu = document.getElementById(id);
+      const allMenus = document.querySelectorAll('.dropdown-menu');
+      allMenus.forEach(m => {
+        if (m.id !== id) m.classList.remove('show');
+      });
+      if (menu) menu.classList.toggle('show');
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+      }
+    });
+
+    // Get content for Flutter
+    window.getHTML = function () {
+      let html = '';
+      document.querySelectorAll('.page').forEach(page => {
+        html += page.innerHTML;
+      });
+      return html || '<p></p>';
+    };
+
+    window.getText = function () {
+      return document.getElementById('doc-container').innerText;
+    };
+
+    window.setContent = function (content) {
+      const container = document.getElementById('doc-container');
+      container.innerHTML = '';
+      pageCount = 0;
+      createPage(content);
+      updatePageNumbers();
+    };
+
+    window.insertContent = function (content) {
+      const activePage = document.querySelector('.page:focus') || document.querySelector('.page');
+      if (activePage) {
+        activePage.innerHTML += content;
+        redistributeContent();
+      }
+    };
+
+    // Initialize on load
+    init();
+  </script>
+</body>
+
+</html>

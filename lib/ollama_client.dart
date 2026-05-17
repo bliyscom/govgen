@@ -22,7 +22,7 @@ class OllamaClient {
     final url = Uri.parse('$baseUrl/api/chat');
     final body = jsonEncode({
       'model': model,
-      'messages': messages.map((m) => m.toJson()).toList(),
+      'messages': messages.map((m) => m.toOllamaJson()).toList(),
       'stream': false,
     });
 
@@ -59,15 +59,15 @@ class OllamaClient {
     }
   }
 
-  Stream<String> chatStream(String model, List<ChatMessage> messages) async* {
+  Stream<String> chatStream(String model, List<ChatMessage> messages, {http.Client? client}) async* {
     final url = Uri.parse('$baseUrl/api/chat');
     final body = jsonEncode({
       'model': model,
-      'messages': messages.map((m) => m.toJson()).toList(),
+      'messages': messages.map((m) => m.toOllamaJson()).toList(),
       'stream': true,
     });
 
-    final client = http.Client();
+    final httpClient = client ?? http.Client();
     try {
       final request = http.Request('POST', url);
       request.headers.addAll({
@@ -76,7 +76,7 @@ class OllamaClient {
       });
       request.body = body;
 
-      final response = await client.send(request);
+      final response = await httpClient.send(request);
 
       if (response.statusCode == 200) {
         await for (final chunk in response.stream.transform(utf8.decoder)) {
@@ -98,9 +98,14 @@ class OllamaClient {
         throw Exception('Ollama stream error: ${response.statusCode}');
       }
     } catch (e) {
+      // If the client was closed externally (cancelled), don't rethrow
+      if (client != null && e.toString().contains('Client is closed')) {
+        return;
+      }
       throw Exception('Stream connection failed: $e');
     } finally {
-      client.close();
+      // Only close if we created the client internally
+      if (client == null) httpClient.close();
     }
   }
 

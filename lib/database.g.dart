@@ -37,8 +37,48 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _contextTextMeta = const VerificationMeta(
+    'contextText',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, title, createdAt];
+  late final GeneratedColumn<String> contextText = GeneratedColumn<String>(
+    'context_text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _contextNameMeta = const VerificationMeta(
+    'contextName',
+  );
+  @override
+  late final GeneratedColumn<String> contextName = GeneratedColumn<String>(
+    'context_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _contextTypeMeta = const VerificationMeta(
+    'contextType',
+  );
+  @override
+  late final GeneratedColumn<String> contextType = GeneratedColumn<String>(
+    'context_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    createdAt,
+    contextText,
+    contextName,
+    contextType,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -72,6 +112,33 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('context_text')) {
+      context.handle(
+        _contextTextMeta,
+        contextText.isAcceptableOrUnknown(
+          data['context_text']!,
+          _contextTextMeta,
+        ),
+      );
+    }
+    if (data.containsKey('context_name')) {
+      context.handle(
+        _contextNameMeta,
+        contextName.isAcceptableOrUnknown(
+          data['context_name']!,
+          _contextNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('context_type')) {
+      context.handle(
+        _contextTypeMeta,
+        contextType.isAcceptableOrUnknown(
+          data['context_type']!,
+          _contextTypeMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -93,6 +160,18 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      contextText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}context_text'],
+      ),
+      contextName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}context_name'],
+      ),
+      contextType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}context_type'],
+      ),
     );
   }
 
@@ -106,10 +185,16 @@ class Session extends DataClass implements Insertable<Session> {
   final String id;
   final String title;
   final DateTime createdAt;
+  final String? contextText;
+  final String? contextName;
+  final String? contextType;
   const Session({
     required this.id,
     required this.title,
     required this.createdAt,
+    this.contextText,
+    this.contextName,
+    this.contextType,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -117,6 +202,15 @@ class Session extends DataClass implements Insertable<Session> {
     map['id'] = Variable<String>(id);
     map['title'] = Variable<String>(title);
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || contextText != null) {
+      map['context_text'] = Variable<String>(contextText);
+    }
+    if (!nullToAbsent || contextName != null) {
+      map['context_name'] = Variable<String>(contextName);
+    }
+    if (!nullToAbsent || contextType != null) {
+      map['context_type'] = Variable<String>(contextType);
+    }
     return map;
   }
 
@@ -125,6 +219,15 @@ class Session extends DataClass implements Insertable<Session> {
       id: Value(id),
       title: Value(title),
       createdAt: Value(createdAt),
+      contextText: contextText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contextText),
+      contextName: contextName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contextName),
+      contextType: contextType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contextType),
     );
   }
 
@@ -137,6 +240,9 @@ class Session extends DataClass implements Insertable<Session> {
       id: serializer.fromJson<String>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      contextText: serializer.fromJson<String?>(json['contextText']),
+      contextName: serializer.fromJson<String?>(json['contextName']),
+      contextType: serializer.fromJson<String?>(json['contextType']),
     );
   }
   @override
@@ -146,19 +252,41 @@ class Session extends DataClass implements Insertable<Session> {
       'id': serializer.toJson<String>(id),
       'title': serializer.toJson<String>(title),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'contextText': serializer.toJson<String?>(contextText),
+      'contextName': serializer.toJson<String?>(contextName),
+      'contextType': serializer.toJson<String?>(contextType),
     };
   }
 
-  Session copyWith({String? id, String? title, DateTime? createdAt}) => Session(
+  Session copyWith({
+    String? id,
+    String? title,
+    DateTime? createdAt,
+    Value<String?> contextText = const Value.absent(),
+    Value<String?> contextName = const Value.absent(),
+    Value<String?> contextType = const Value.absent(),
+  }) => Session(
     id: id ?? this.id,
     title: title ?? this.title,
     createdAt: createdAt ?? this.createdAt,
+    contextText: contextText.present ? contextText.value : this.contextText,
+    contextName: contextName.present ? contextName.value : this.contextName,
+    contextType: contextType.present ? contextType.value : this.contextType,
   );
   Session copyWithCompanion(SessionsCompanion data) {
     return Session(
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      contextText: data.contextText.present
+          ? data.contextText.value
+          : this.contextText,
+      contextName: data.contextName.present
+          ? data.contextName.value
+          : this.contextName,
+      contextType: data.contextType.present
+          ? data.contextType.value
+          : this.contextType,
     );
   }
 
@@ -167,37 +295,53 @@ class Session extends DataClass implements Insertable<Session> {
     return (StringBuffer('Session(')
           ..write('id: $id, ')
           ..write('title: $title, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('contextText: $contextText, ')
+          ..write('contextName: $contextName, ')
+          ..write('contextType: $contextType')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, title, createdAt);
+  int get hashCode =>
+      Object.hash(id, title, createdAt, contextText, contextName, contextType);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Session &&
           other.id == this.id &&
           other.title == this.title &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.contextText == this.contextText &&
+          other.contextName == this.contextName &&
+          other.contextType == this.contextType);
 }
 
 class SessionsCompanion extends UpdateCompanion<Session> {
   final Value<String> id;
   final Value<String> title;
   final Value<DateTime> createdAt;
+  final Value<String?> contextText;
+  final Value<String?> contextName;
+  final Value<String?> contextType;
   final Value<int> rowid;
   const SessionsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.contextText = const Value.absent(),
+    this.contextName = const Value.absent(),
+    this.contextType = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   SessionsCompanion.insert({
     required String id,
     required String title,
     required DateTime createdAt,
+    this.contextText = const Value.absent(),
+    this.contextName = const Value.absent(),
+    this.contextType = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -206,12 +350,18 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Expression<String>? id,
     Expression<String>? title,
     Expression<DateTime>? createdAt,
+    Expression<String>? contextText,
+    Expression<String>? contextName,
+    Expression<String>? contextType,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (title != null) 'title': title,
       if (createdAt != null) 'created_at': createdAt,
+      if (contextText != null) 'context_text': contextText,
+      if (contextName != null) 'context_name': contextName,
+      if (contextType != null) 'context_type': contextType,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -220,12 +370,18 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Value<String>? id,
     Value<String>? title,
     Value<DateTime>? createdAt,
+    Value<String?>? contextText,
+    Value<String?>? contextName,
+    Value<String?>? contextType,
     Value<int>? rowid,
   }) {
     return SessionsCompanion(
       id: id ?? this.id,
       title: title ?? this.title,
       createdAt: createdAt ?? this.createdAt,
+      contextText: contextText ?? this.contextText,
+      contextName: contextName ?? this.contextName,
+      contextType: contextType ?? this.contextType,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -242,6 +398,15 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (contextText.present) {
+      map['context_text'] = Variable<String>(contextText.value);
+    }
+    if (contextName.present) {
+      map['context_name'] = Variable<String>(contextName.value);
+    }
+    if (contextType.present) {
+      map['context_type'] = Variable<String>(contextType.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -254,6 +419,9 @@ class SessionsCompanion extends UpdateCompanion<Session> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('createdAt: $createdAt, ')
+          ..write('contextText: $contextText, ')
+          ..write('contextName: $contextName, ')
+          ..write('contextType: $contextType, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -686,6 +854,9 @@ typedef $$SessionsTableCreateCompanionBuilder =
       required String id,
       required String title,
       required DateTime createdAt,
+      Value<String?> contextText,
+      Value<String?> contextName,
+      Value<String?> contextType,
       Value<int> rowid,
     });
 typedef $$SessionsTableUpdateCompanionBuilder =
@@ -693,6 +864,9 @@ typedef $$SessionsTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> title,
       Value<DateTime> createdAt,
+      Value<String?> contextText,
+      Value<String?> contextName,
+      Value<String?> contextType,
       Value<int> rowid,
     });
 
@@ -741,6 +915,21 @@ class $$SessionsTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contextText => $composableBuilder(
+    column: $table.contextText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contextName => $composableBuilder(
+    column: $table.contextName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contextType => $composableBuilder(
+    column: $table.contextType,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -793,6 +982,21 @@ class $$SessionsTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get contextText => $composableBuilder(
+    column: $table.contextText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contextName => $composableBuilder(
+    column: $table.contextName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contextType => $composableBuilder(
+    column: $table.contextType,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SessionsTableAnnotationComposer
@@ -812,6 +1016,21 @@ class $$SessionsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get contextText => $composableBuilder(
+    column: $table.contextText,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get contextName => $composableBuilder(
+    column: $table.contextName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get contextType => $composableBuilder(
+    column: $table.contextType,
+    builder: (column) => column,
+  );
 
   Expression<T> messagesRefs<T extends Object>(
     Expression<T> Function($$MessagesTableAnnotationComposer a) f,
@@ -870,11 +1089,17 @@ class $$SessionsTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String?> contextText = const Value.absent(),
+                Value<String?> contextName = const Value.absent(),
+                Value<String?> contextType = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SessionsCompanion(
                 id: id,
                 title: title,
                 createdAt: createdAt,
+                contextText: contextText,
+                contextName: contextName,
+                contextType: contextType,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -882,11 +1107,17 @@ class $$SessionsTableTableManager
                 required String id,
                 required String title,
                 required DateTime createdAt,
+                Value<String?> contextText = const Value.absent(),
+                Value<String?> contextName = const Value.absent(),
+                Value<String?> contextType = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SessionsCompanion.insert(
                 id: id,
                 title: title,
                 createdAt: createdAt,
+                contextText: contextText,
+                contextName: contextName,
+                contextType: contextType,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
