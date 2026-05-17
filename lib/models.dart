@@ -595,7 +595,7 @@ class ResearchProject {
     for (int i = 0; i < defaultTitles.length; i++) {
       final title = defaultTitles[i];
       final instruction = defaultInstructions[title] ?? "";
-      final initialContent = (title == 'Title' || title == 'Project Title' || title == 'Assessment Title' || title == 'Plan Title' || title == 'Trial Title' || title == 'Case Brief' || title == 'Security Audit Title') ? this.title : "";
+      final initialContent = (i == 0) ? this.title : "";
       
       if (instruction.isNotEmpty) {
         final formattedInstruction = "[$title]: $instruction";
