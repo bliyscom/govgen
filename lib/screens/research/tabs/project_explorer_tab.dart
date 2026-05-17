@@ -89,35 +89,97 @@ class _ProjectExplorerTabState extends State<ProjectExplorerTab> with AutomaticK
 
   void _showNewProjectDialog(BuildContext context, ChatState state) {
     final controller = TextEditingController();
+    final projectTypes = [
+      "Academic Manuscript",
+      "Public Policy Draft",
+      "NGO Project Report",
+      "Corporate Strategy Document",
+      "Technical Whitepaper",
+      "Market Research Analysis",
+      "Grant Proposal Application",
+      "Feasibility Study",
+      "Environmental Impact Assessment (EIA)",
+      "Product Requirements Document (PRD)",
+      "Clinical Trial Protocol",
+      "Legal Opinion Brief",
+      "Investment Memorandum",
+      "Socioeconomic Survey Report",
+      "System Security Audit",
+      "UX Research Plan"
+    ];
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: OhadaTheme.surface,
-        title: const Text('Initialize Research Project', style: TextStyle(color: OhadaTheme.accent, fontWeight: FontWeight.bold)),
-        content: TextField(
-          controller: controller,
-          style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(
-            hintText: 'e.g. Impact of AI on Public Policy',
-            hintStyle: TextStyle(color: Colors.grey),
-            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-          ),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL', style: TextStyle(color: Colors.grey))),
-          ElevatedButton(
-            onPressed: () {
-              if (controller.text.isNotEmpty) {
-                state.createNewProject(controller.text);
-                Navigator.pop(context);
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: OhadaTheme.accent, foregroundColor: OhadaTheme.primary),
-            child: const Text('CREATE'),
-          ),
-        ],
-      ),
+      builder: (context) {
+        String selectedType = "Academic Manuscript";
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: OhadaTheme.surface,
+              title: const Text('Initialize Research Project', style: TextStyle(color: OhadaTheme.accent, fontWeight: FontWeight.bold)),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Project Name', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    TextField(
+                      controller: controller,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: 'e.g. Impact of AI on Public Policy',
+                        hintStyle: TextStyle(color: Colors.grey),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+                      ),
+                      autofocus: true,
+                    ),
+                    const SizedBox(height: 20),
+                    const Text('Project Template / Domain', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: selectedType,
+                      dropdownColor: OhadaTheme.surface,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        fillColor: Colors.white.withOpacity(0.05),
+                        filled: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                      ),
+                      items: projectTypes.map((type) {
+                        return DropdownMenuItem<String>(
+                          value: type,
+                          child: Text(type, style: const TextStyle(fontSize: 14)),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            selectedType = val;
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL', style: TextStyle(color: Colors.grey))),
+                ElevatedButton(
+                  onPressed: () {
+                    if (controller.text.isNotEmpty) {
+                      state.createNewProject(controller.text, projectType: selectedType);
+                      Navigator.pop(context);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: OhadaTheme.accent, foregroundColor: OhadaTheme.primary),
+                  child: const Text('CREATE'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -125,6 +187,28 @@ class _ProjectExplorerTabState extends State<ProjectExplorerTab> with AutomaticK
 class _ProjectCard extends StatelessWidget {
   final ResearchProject project;
   const _ProjectCard({required this.project});
+
+  String _getTypeIcon(String type) {
+    switch (type) {
+      case "Academic Manuscript": return "🎓";
+      case "Public Policy Draft": return "🏛️";
+      case "NGO Project Report": return "🌍";
+      case "Corporate Strategy Document": return "💼";
+      case "Technical Whitepaper": return "💻";
+      case "Market Research Analysis": return "📈";
+      case "Grant Proposal Application": return "💰";
+      case "Feasibility Study": return "🔍";
+      case "Environmental Impact Assessment (EIA)": return "🌿";
+      case "Product Requirements Document (PRD)": return "📱";
+      case "Clinical Trial Protocol": return "🔬";
+      case "Legal Opinion Brief": return "⚖️";
+      case "Investment Memorandum": return "💵";
+      case "Socioeconomic Survey Report": return "📊";
+      case "System Security Audit": return "🛡️";
+      case "UX Research Plan": return "🎨";
+      default: return "📄";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -166,15 +250,28 @@ class _ProjectCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, height: 1.2),
                         ),
-                        const SizedBox(height: 4),
-                        Row(
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: OhadaTheme.accent.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                '${_getTypeIcon(project.projectType)} ${project.projectType}',
+                                style: const TextStyle(fontSize: 9, color: OhadaTheme.accent, fontWeight: FontWeight.bold),
+                              ),
+                            ),
                             Text(
                               'ID: ${project.id}', 
                               style: const TextStyle(fontSize: 10, color: Colors.grey, fontFamily: 'monospace'),
                             ),
-                            if (project.lastCompletedStage.isNotEmpty) ...[
-                              const SizedBox(width: 8),
+                            if (project.lastCompletedStage.isNotEmpty)
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
@@ -186,7 +283,6 @@ class _ProjectCard extends StatelessWidget {
                                   style: const TextStyle(fontSize: 8, color: Colors.greenAccent, fontWeight: FontWeight.bold),
                                 ),
                               ),
-                            ],
                           ],
                         ),
                       ],

@@ -304,13 +304,13 @@ class ChatState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void createNewProject(String title) {
-    final newProject = ResearchProject(title: title);
+  void createNewProject(String title, {String projectType = "Academic Manuscript"}) {
+    final newProject = ResearchProject(title: title, projectType: projectType);
     _projectBox.put(newProject.id, jsonEncode(newProject.toJson()));
     _allProjects.add(newProject);
     _currentProject = newProject;
     _researchTabIndex = 1;
-    _terminalLines.add("🚀 Project Created: ${newProject.title}");
+    _terminalLines.add("🚀 Project Created: ${newProject.title} ($projectType)");
     notifyListeners();
   }
 
@@ -943,14 +943,31 @@ IMPORTANT: OUTPUT ONLY THE CONTENT FOR THIS SECTION. START DIRECTLY WITH THE CON
     saveResearchHub();
 
     // === STEP 2: Write sections sequentially ===
-    // Order: Abstract -> Keywords -> Core Sections
-    // Title is already handled by project settings
-    final sectionsToWrite = ['Abstract', 'Keywords', 'Introduction', 'Results', 'Discussion', 'Conclusion'];
-    // Sections that MUST have in-text citations
-    const citationSections = {'Introduction', 'Literature Review', 'Discussion', 'Methodology', 'Results'};
+    // Dynamically extract core sections to write, excluding metadata/utility sections
+    final excludeSections = {
+      'title', 'project title', 'document title', 'assessment title', 'plan title', 'trial title', 'case brief', 'security audit title',
+      'authors', 'references', 'bibliography', 'reviewer comments', 'reviewer feedback', 'ai detection', 'similarity'
+    };
+    
+    final sectionsToWrite = _currentProject!.sections
+        .map((s) => s.title)
+        .where((title) {
+          final tLower = title.toLowerCase();
+          if (excludeSections.contains(tLower)) return false;
+          // Skip if it is a Literature Review or Methodology section that is already populated
+          if ((tLower.contains('literature') || tLower.contains('needs assessment') || tLower.contains('market analysis') || tLower.contains('swot')) && 
+              _currentProject!.litReview.isNotEmpty) {
+            return false;
+          }
+          if ((tLower.contains('methodology') || tLower.contains('activities') || tLower.contains('roadmap')) && 
+              _currentProject!.methodology.isNotEmpty) {
+            return false;
+          }
+          return true;
+        })
+        .toList();
     
     String accumulatedManuscript = "";
-    final authorIndex = _buildAuthorIndex();
     final knowledgeBase = buildLiteratureKnowledgeBase();
 
     for (final sectionName in sectionsToWrite) {
@@ -1055,7 +1072,9 @@ $prevCtx
       notifyListeners();
 
       // === PASS 2: Chunk-based citation injection + Quality Gate ===
-      if (citationSections.contains(sectionName)) {
+      final tLower = sectionName.toLowerCase();
+      final isCitationSection = !tLower.contains('abstract') && !tLower.contains('keywords') && !tLower.contains('authors');
+      if (isCitationSection) {
         _terminalLines.add("  🔗 Injecting citations into $sectionName...");
         notifyListeners();
         
@@ -1657,13 +1676,42 @@ $paragraph""";
 
   void _updateSectionContentByTitle(String title, String content) {
     if (_currentProject == null) return;
-    int idx = _currentProject!.sections.indexWhere((s) => s.title.toLowerCase().contains(title.toLowerCase()));
+    
+    // Smart Keyword Mapping for domains/templates
+    List<String> keywords = [title];
+    final titleLower = title.toLowerCase();
+    
+    if (titleLower.contains('literature') || titleLower.contains('litreview')) {
+      keywords = ['literature', 'review', 'background', 'context', 'needs', 'market', 'swot'];
+    } else if (titleLower.contains('methodology')) {
+      keywords = ['methodology', 'framework', 'options', 'objectives', 'goals', 'activities'];
+    } else if (titleLower.contains('results') || titleLower.contains('analysis')) {
+      keywords = ['results', 'analysis', 'implementation', 'roadmap', 'findings', 'viable', 'options'];
+    } else if (titleLower.contains('references')) {
+      keywords = ['references', 'bibliography'];
+    } else if (titleLower.contains('reviewer comments') || titleLower.contains('feedback')) {
+      keywords = ['reviewer comments', 'reviewer feedback'];
+    }
+
+    int idx = -1;
+    // Try to find by keyword matches first
+    for (final kw in keywords) {
+      idx = _currentProject!.sections.indexWhere((s) => s.title.toLowerCase().contains(kw.toLowerCase()));
+      if (idx != -1) break;
+    }
+    
+    // Fallback: exact contains match on original title
+    if (idx == -1) {
+      idx = _currentProject!.sections.indexWhere((s) => s.title.toLowerCase().contains(titleLower));
+    }
+    
     if (idx != -1) {
       final section = _currentProject!.sections[idx];
       _pushSectionHistory(section.id, section.content);
       section.content = content;
       _recordFinalState(section.id);
     } else {
+      // Create a new section if not found
       int maxOrder = _currentProject!.sections.fold(0, (max, s) => s.order > max ? s.order : max);
       final newSection = ManuscriptSection(title: title, content: content, order: maxOrder + 1);
       _currentProject!.sections.add(newSection);
