@@ -591,11 +591,27 @@ class ResearchProject {
         };
     }
 
+    String accumulatedPrompt = "";
     for (int i = 0; i < defaultTitles.length; i++) {
       final title = defaultTitles[i];
       final instruction = defaultInstructions[title] ?? "";
       final initialContent = (title == 'Title' || title == 'Project Title' || title == 'Assessment Title' || title == 'Plan Title' || title == 'Trial Title' || title == 'Case Brief' || title == 'Security Audit Title') ? this.title : "";
-      sections.add(ManuscriptSection(title: title, content: initialContent, order: i, customPrompt: instruction));
+      
+      if (instruction.isNotEmpty) {
+        final formattedInstruction = "[$title]: $instruction";
+        if (accumulatedPrompt.isNotEmpty) {
+          accumulatedPrompt += "\n\n$formattedInstruction";
+        } else {
+          accumulatedPrompt = formattedInstruction;
+        }
+      }
+      
+      sections.add(ManuscriptSection(
+        title: title,
+        content: initialContent,
+        order: i,
+        customPrompt: accumulatedPrompt.isNotEmpty ? accumulatedPrompt : instruction,
+      ));
     }
   }
 

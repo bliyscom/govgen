@@ -1722,7 +1722,15 @@ $paragraph""";
   void addManuscriptSection(String title) {
     if (_currentProject == null) return;
     int maxOrder = _currentProject!.sections.fold(0, (max, s) => s.order > max ? s.order : max);
-    final newSection = ManuscriptSection(title: title, order: maxOrder + 1);
+    String inheritedPrompt = "";
+    if (_currentProject!.sections.isNotEmpty) {
+      inheritedPrompt = _currentProject!.sections.last.customPrompt;
+    }
+    final newSection = ManuscriptSection(
+      title: title, 
+      order: maxOrder + 1,
+      customPrompt: inheritedPrompt,
+    );
     _currentProject!.sections.add(newSection);
     _activeOutputSectionId = newSection.id;
     saveResearchHub();
