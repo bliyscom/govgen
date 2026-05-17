@@ -10,26 +10,7 @@ class ChatPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<ChatState>();
-    // Simple placeholder for main chat (since the focus is Research Hub)
-    return Column(
-      children: [
-        const Expanded(child: WelcomeView()),
-        _buildChatInput(state),
-      ],
-    );
-  }
-
-  Widget _buildChatInput(ChatState state) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: "Message GovGen...",
-          suffixIcon: IconButton(icon: const Icon(Icons.send), onPressed: () {}),
-        ),
-      ),
-    );
+    return const WelcomeView();
   }
 }
 
